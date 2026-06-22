@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Carlos Lopez
+ * Copyright (C) 2026 Carlos Lopez
  * SPDX-License-Identifier: MIT
  */
 
