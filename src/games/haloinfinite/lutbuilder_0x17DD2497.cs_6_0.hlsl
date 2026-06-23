@@ -93,9 +93,13 @@ void main(
 
     float3 diff = exposure - luma;
     float3 satAdj = lumaEps + dwsSaturation * diff;
+
     float3 ln = log2(satAdj) * 0.6931471824645996f;
     float3 contrasted0 = (ln - dwsContrastMidpoint) * dwsContrast + dwsContrastMidpoint;
     float3 exped = exp2(contrasted0 * 1.4426950216293335f) + -9.999999747378752e-06f;
+
+    satAdj = pow(satAdj / dwsContrastMidpoint, dwsContrast) * dwsContrastMidpoint;
+
     float3 clamped = exped; //max(0.0f.xxx, exped);
     float3 lifted = (1.0f.xxx - dwsLift) * clamped + dwsLift;
     float3 gained = lifted * dwsGain;

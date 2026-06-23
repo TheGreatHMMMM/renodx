@@ -15,6 +15,7 @@
 #include "../../mods/shader.hpp"
 #include "../../mods/swapchain.hpp"
 #include "../../utils/settings.hpp"
+#include "./dlss.hpp"
 #include "./shared.h"
 
 namespace {
@@ -72,6 +73,28 @@ renodx::utils::settings::Settings settings = {
             .section = "Note",
     },
     new renodx::utils::settings::Setting{
+      .key = "DLSSReplacement",
+      .binding = &halo_infinite::dlss::dlss_enabled,
+      .value_type = renodx::utils::settings::SettingValueType::BOOLEAN,
+      .default_value = 1.f,
+      .label = "DLAA Replacement",
+      .section = "Antialiasing",
+      .tooltip = "Runs NVIDIA DLAA in place of Halo Infinite's TAA pass when the TAA resources can be resolved. Requires nvngx_dlss.dll next to the game executable.",
+      .labels = {"Passthrough", "DLAA"},
+      .is_visible = []() { return halo_infinite::dlss::IsSupported(); },
+    },
+    new renodx::utils::settings::Setting{
+      .key = "DLSSPreset",
+      .binding = &halo_infinite::dlss::dlss_render_preset,
+      .value_type = renodx::utils::settings::SettingValueType::INTEGER,
+      .default_value = 0.f,
+      .label = "DLSS Preset",
+      .section = "Antialiasing",
+      .labels = {"Default", "F - CNN", "J - Transformer 1", "K - Transformer 1", "L - Transformer 2", "M - Transformer 2"},
+      .is_enabled = []() { return halo_infinite::dlss::dlss_enabled != 0.f; },
+      .is_visible = []() { return halo_infinite::dlss::IsSupported(); },
+    },
+    new renodx::utils::settings::Setting{
             .value_type = renodx::utils::settings::SettingValueType::TEXT,
             .label = "Mod by TheGreatHmmmmm, RenoDX Framework by ShortFuse.",
             .section = "About",
@@ -120,6 +143,7 @@ BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
   }
 
   renodx::utils::settings::Use(fdw_reason, &settings, &OnPresetOff);
+  halo_infinite::dlss::Use(fdw_reason);
   renodx::mods::shader::Use(fdw_reason, custom_shaders, &shader_injection);
 
   return TRUE;

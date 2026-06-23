@@ -89,8 +89,6 @@ float4 main(
 
     float3 sum = source1Sample.rgb + source0;
 
-    float compression_scale;
-
     sum = renodx::color::pq::Encode(sum, 200.f);
 
     uint lutTexIndex = ResolveBindlessIndex(psLutParameters[5].texIndex, 18);

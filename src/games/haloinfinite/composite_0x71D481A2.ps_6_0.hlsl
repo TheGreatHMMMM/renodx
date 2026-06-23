@@ -98,7 +98,9 @@ float4 main(
     float peak = RENODX_PEAK_WHITE_NITS / RENODX_DIFFUSE_WHITE_NITS;
 
     sceneColor = renodx::color::pq::DecodeSafe(sceneColor, RENODX_DIFFUSE_WHITE_NITS);
+
     sceneColor = renodx::color::correct::GammaSafe(sceneColor);
+
     sceneColor = NeutwoStockmanSharpeLMS(sceneColor, peak, 100.f);
     
     sceneColor = renodx::color::pq::EncodeSafe(sceneColor, RENODX_DIFFUSE_WHITE_NITS);
