@@ -65,17 +65,19 @@ renodx::utils::settings::Settings settings = {
         .max = 500.f,
         .is_enabled = []() { return shader_injection.tone_map_type != 0; },
     },
-    new renodx::utils::settings::Setting{
-        .key = "ToneMapGammaCorrection",
-        .binding = &shader_injection.gamma_correction,
-        .value_type = renodx::utils::settings::SettingValueType::INTEGER,
-        .default_value = 1.f,
-        .label = "SDR EOTF Emulation",
-        .section = "Tone Mapping",
-        .tooltip = "Emulates a 2.2 EOTF",
-        .labels = {"Off", "2.2"},
-        .is_enabled = []() { return shader_injection.tone_map_type != 0.f && shader_injection.tone_map_type != 2.f; },
-    },
+
+    //new renodx::utils::settings::Setting{
+    //    .key = "ToneMapGammaCorrection",
+    //    .binding = &shader_injection.gamma_correction,
+    //    .value_type = renodx::utils::settings::SettingValueType::INTEGER,
+    //    .default_value = 1.f,
+    //    .label = "SDR EOTF Emulation",
+    //    .section = "Tone Mapping",
+    //    .tooltip = "Emulates a 2.2 EOTF",
+    //    .labels = {"Off", "2.2"},
+    //    .is_enabled = []() { return shader_injection.tone_map_type != 0.f && shader_injection.tone_map_type != 2.f; },
+    //},
+    
     new renodx::utils::settings::Setting{
         .key = "ToneMapOverrideBlackClip",
         .binding = &shader_injection.tone_map_override_black_clip,
@@ -161,7 +163,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "ColorGradeConeResponse",
         .binding = &shader_injection.tone_map_cone_response,
-        .default_value = 50.f,
+        .default_value = 55.f,
         .label = "Cone Response Exponent",
         .section = "Color Grading",
         .tooltip = "PsychoV24: Scales the cone response exponent used for contrast and purity.",
@@ -445,7 +447,7 @@ void OnPresetOff() {
       {"ColorGradeShadows", 50.f},
       {"ColorGradeContrast", 50.f},
       {"ColorGradeSaturation", 50.f},
-      {"ColorGradeConeResponse", 50.f},
+      {"ColorGradeConeResponse", 55.f},
       {"ColorGradeGamutCompression", 100.f},
       {"ColorGradeGamutCompressionMode", 1.f},
       {"ColorGradeCompression", 100.f},

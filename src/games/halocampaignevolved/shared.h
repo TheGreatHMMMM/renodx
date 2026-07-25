@@ -58,7 +58,7 @@ cbuffer cb13 : register(b13, space50) {
 #define RENODX_PEAK_WHITE_NITS               shader_injection.peak_white_nits
 #define RENODX_DIFFUSE_WHITE_NITS            shader_injection.diffuse_white_nits
 #define RENODX_GRAPHICS_WHITE_NITS           shader_injection.graphics_white_nits
-#define RENODX_GAMMA_CORRECTION              shader_injection.gamma_correction
+//#define RENODX_GAMMA_CORRECTION              shader_injection.gamma_correction
 #define RENODX_GAMMA_CORRECTION_UI           shader_injection.gamma_correction_ui
 #define RENODX_TONE_MAP_OVERRIDE_BLACK_CLIP  shader_injection.tone_map_override_black_clip  // 0 - Off, 1 - 0.0001 nits
 #define RENODX_TONE_MAP_HUE_CORRECTION_TYPE  shader_injection.tone_map_hue_correction_type  // 0 - Highlights, Midtones, & Shadows, 1 - Midtones & Shadows
@@ -87,6 +87,7 @@ cbuffer cb13 : register(b13, space50) {
 #define CUSTOM_SHARPNESS               shader_injection.custom_sharpness
 #define CUSTOM_CHROMATIC_ABERRATION    shader_injection.custom_chromatic_aberration
 #define CUSTOM_LOCAL_EXPOSURE_STRENGTH shader_injection.custom_local_exposure_strength
+#define CUSTOM_LOCAL_EXPOSURE_STRENGTH  (RENODX_TONE_MAP_TYPE == 2.f) ? 0.f : shader_injection.custom_local_exposure_strength
 #define CUSTOM_SHARPENING_STRENGTH     shader_injection.custom_sharpening_strength
 
 // #define FIX_POST_PROCESS                     shader_injection.fix_post_process     // 0 - BT.2020 PQ, 1 - BT.709 piecewise sRGB, 2 - BT.2020 piecewise sRGB

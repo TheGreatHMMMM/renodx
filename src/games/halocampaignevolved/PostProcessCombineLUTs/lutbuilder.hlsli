@@ -74,7 +74,9 @@ float3 EncodeRec709Safe(float3 color) {
 }
 
 float3 ApplyEOTFEmulation(float3 color_ap1) {
-  if (RENODX_GAMMA_CORRECTION == 0.f) return color_ap1;
+  // GammaSafe EOTF emulation is hardcoded on for the Vanilla+ tone map path only.
+  // PsychoV24 (and any other tone map type) skips it.
+  if (RENODX_TONE_MAP_TYPE != 1.f) return color_ap1;
 
   float3 color_bt709 = renodx::color::bt709::from::AP1(color_ap1);
   color_bt709 = renodx::color::correct::GammaSafe(color_bt709);
@@ -97,13 +99,14 @@ bool TryApplyCustomLUTBuilder(
     float3 tonemapped_ap1;
     if (RENODX_TONE_MAP_TYPE == 1.f) {
       // Vanilla+ applies the shared color grade in AP1 before the film curve.
+      graded_ap1 = renodx::color::correct::GammaSafe(graded_ap1);
       graded_ap1 = ApplyUserGradingAP1(graded_ap1);
       tonemapped_ap1 = filmtonemap::ApplyExtended(graded_ap1, config.film);
     }
     if (RENODX_TONE_MAP_TYPE == 2.f) {
       // PsychoV24 consumes the shared grade sliders through its own parameters,
       // so the AP1 user grade is intentionally skipped to avoid double-applying.
-      graded_ap1 = renodx::color::bt2020::from::AP1(graded_ap1);
+      graded_ap1 = renodx::color::bt709::from::AP1(graded_ap1);
       tonemapped_ap1 = renodx::tonemap::psychov::psychotm_test24(
           graded_ap1,
           RENODX_PEAK_WHITE_NITS / RENODX_DIFFUSE_WHITE_NITS,
@@ -126,7 +129,7 @@ bool TryApplyCustomLUTBuilder(
           RENODX_TONE_MAP_COMPRESSION,
           1.f,                         // highlight_saturation (unused)
           RENODX_TONE_MAP_GAMUT_HUE_RESTORE);
-      tonemapped_ap1 = renodx::color::ap1::from::BT2020(tonemapped_ap1);
+      tonemapped_ap1 = renodx::color::ap1::from::BT709(tonemapped_ap1);
     }
 
     color_working = mul(
