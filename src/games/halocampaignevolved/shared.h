@@ -33,6 +33,16 @@ struct ShaderInjectData {
   float custom_grain_strength;
   float custom_sharpness;
   float custom_chromatic_aberration;
+  float custom_local_exposure_strength;
+  float custom_sharpening_strength;
+  float custom_film_grain_strength;
+
+  // PsychoV24 tone mapper parameters
+  float tone_map_cone_response;
+  float tone_map_gamut_compression;
+  float tone_map_gamut_compression_mode;
+  float tone_map_compression;
+  float tone_map_gamut_hue_restore;
 
   // float fix_post_process;
 };
@@ -65,11 +75,19 @@ cbuffer cb13 : register(b13, space50) {
 #define RENODX_COLOR_GRADE_SCALING           shader_injection.custom_color_grade_scaling
 #define CUSTOM_LUT_GAMUT_RESTORATION         shader_injection.custom_lut_gamut_restoration
 
-#define CUSTOM_RANDOM               shader_injection.custom_random
-#define CUSTOM_GRAIN_TYPE           shader_injection.custom_grain_type
-#define CUSTOM_GRAIN_STRENGTH       shader_injection.custom_grain_strength
-#define CUSTOM_SHARPNESS            shader_injection.custom_sharpness
-#define CUSTOM_CHROMATIC_ABERRATION shader_injection.custom_chromatic_aberration
+#define RENODX_TONE_MAP_CONE_RESPONSE_EXPONENT  shader_injection.tone_map_cone_response
+#define RENODX_TONE_MAP_GAMUT_COMPRESSION       shader_injection.tone_map_gamut_compression
+#define RENODX_TONE_MAP_GAMUT_COMPRESSION_MODE  shader_injection.tone_map_gamut_compression_mode
+#define RENODX_TONE_MAP_COMPRESSION             shader_injection.tone_map_compression
+#define RENODX_TONE_MAP_GAMUT_HUE_RESTORE       shader_injection.tone_map_gamut_hue_restore
+
+#define CUSTOM_RANDOM                  shader_injection.custom_random
+#define CUSTOM_GRAIN_TYPE              shader_injection.custom_grain_type
+#define CUSTOM_GRAIN_STRENGTH          shader_injection.custom_grain_strength
+#define CUSTOM_SHARPNESS               shader_injection.custom_sharpness
+#define CUSTOM_CHROMATIC_ABERRATION    shader_injection.custom_chromatic_aberration
+#define CUSTOM_LOCAL_EXPOSURE_STRENGTH shader_injection.custom_local_exposure_strength
+#define CUSTOM_SHARPENING_STRENGTH     shader_injection.custom_sharpening_strength
 
 // #define FIX_POST_PROCESS                     shader_injection.fix_post_process     // 0 - BT.2020 PQ, 1 - BT.709 piecewise sRGB, 2 - BT.2020 piecewise sRGB
 

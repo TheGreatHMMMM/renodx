@@ -801,7 +801,9 @@ void main(
       _335 = t1.SampleLevel(s0, float2(_173, min(max((cb0_010w + _39), cb0_016y), cb0_016w)), 0.0f);
       _354 = _89 * View_2572;
       _355 = _354 * exp2((((_281 - _285) + ((_285 - _281) * cb0_033z)) - _300) + (_300 * select(_288, cb0_033x, cb0_033y)));
+      _355 = lerp(_354, _355, CUSTOM_LOCAL_EXPOSURE_STRENGTH);
       _360 = -0.0f - (cb0_057y * saturate(1.0f - (_355 * max(max(abs(_310 - dot(float3(_314.x, _314.y, _314.z), float3(0.2126390039920807f, 0.7151686549186707f, 0.07219231873750687f))), abs(_310 - dot(float3(_321.x, _321.y, _321.z), float3(0.2126390039920807f, 0.7151686549186707f, 0.07219231873750687f)))), max(abs(_310 - dot(float3(_328.x, _328.y, _328.z), float3(0.2126390039920807f, 0.7151686549186707f, 0.07219231873750687f))), abs(_310 - dot(float3(_335.x, _335.y, _335.z), float3(0.2126390039920807f, 0.7151686549186707f, 0.07219231873750687f))))))));
+      _360 *= CUSTOM_SHARPENING_STRENGTH;
       do {
         _394 = 1.0f;
         [branch]
@@ -839,6 +841,9 @@ void main(
         _471 = ((((_455.x * _411) + -1.0f) * _443) + 1.0f) * _406;
         _472 = ((((_455.y * _412) + -1.0f) * _443) + 1.0f) * _407;
         _473 = ((((_455.z * _413) + -1.0f) * _443) + 1.0f) * _408;
+        _471 = lerp(_406, _471, CUSTOM_GRAIN_STRENGTH);
+        _472 = lerp(_407, _472, CUSTOM_GRAIN_STRENGTH);
+        _473 = lerp(_408, _473, CUSTOM_GRAIN_STRENGTH);
         do {
           [branch]
           if ((uint)cb0_008w > (uint)2) {
@@ -896,7 +901,9 @@ void main(
                   false,
                   renodx::color::BT2020_TO_XYZ_MAT);
               float3 color_pq = renodx::color::pq::EncodeSafe(color_bt2020, RENODX_DIFFUSE_WHITE_NITS);
-              _665 = color_pq.r, _666 = color_pq.g, _667 = color_pq.b;
+              _665 = color_pq.r;
+              _666 = color_pq.g;
+              _667 = color_pq.b;
             }
 #endif
             _674 = (frac(sin((cb0_002x + _38) + ((cb0_002y + _39) * 543.3099975585938f)) * 493013.0f) * 2.0f) + -1.0f;

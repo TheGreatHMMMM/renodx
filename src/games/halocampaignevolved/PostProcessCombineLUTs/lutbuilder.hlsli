@@ -6,6 +6,7 @@
 #include "./config.hlsli"
 #include "./filmtonemap.hlsli"
 #include "./usergrading.hlsli"
+#include "../psychovtest24.hlsl"
 
 namespace unrealengine {
 namespace lutbuilder {
@@ -93,9 +94,41 @@ bool TryApplyCustomLUTBuilder(
 
   float3 color_working;
   if ((config.output.output_device != outputdevice::LINEAR_EXR) && (config.output.output_device != outputdevice::NO_TONE_CURVE)) {
-    graded_ap1 = ApplyUserGradingAP1(graded_ap1);
+    float3 tonemapped_ap1;
+    if (RENODX_TONE_MAP_TYPE == 1.f) {
+      // Vanilla+ applies the shared color grade in AP1 before the film curve.
+      graded_ap1 = ApplyUserGradingAP1(graded_ap1);
+      tonemapped_ap1 = filmtonemap::ApplyExtended(graded_ap1, config.film);
+    }
+    if (RENODX_TONE_MAP_TYPE == 2.f) {
+      // PsychoV24 consumes the shared grade sliders through its own parameters,
+      // so the AP1 user grade is intentionally skipped to avoid double-applying.
+      graded_ap1 = renodx::color::bt2020::from::AP1(graded_ap1);
+      tonemapped_ap1 = renodx::tonemap::psychov::psychotm_test24(
+          graded_ap1,
+          RENODX_PEAK_WHITE_NITS / RENODX_DIFFUSE_WHITE_NITS,
+          RENODX_TONE_MAP_EXPOSURE,
+          RENODX_TONE_MAP_HIGHLIGHTS,
+          RENODX_TONE_MAP_SHADOWS,
+          1.f,                         // contrast (disabled in PsychoV24)
+          RENODX_TONE_MAP_SATURATION,  // purity_scale
+          1.f,                         // bleaching_intensity (unused)
+          100.f,                       // clip_point (unused)
+          1.f,                         // hue_restore (unused)
+          1.f,                         // adaptation_contrast (fixed)
+          0,                           // white_curve_mode (unused)
+          RENODX_TONE_MAP_CONE_RESPONSE_EXPONENT,
+          0.18f,                       // current_adaptive_state (fixed)
+          0.18f,                       // current_background_state (fixed)
+          RENODX_TONE_MAP_GAMUT_COMPRESSION,
+          (int)RENODX_TONE_MAP_GAMUT_COMPRESSION_MODE,
+          1.f,                         // adaptive_normalization (unused)
+          RENODX_TONE_MAP_COMPRESSION,
+          1.f,                         // highlight_saturation (unused)
+          RENODX_TONE_MAP_GAMUT_HUE_RESTORE);
+      tonemapped_ap1 = renodx::color::ap1::from::BT2020(tonemapped_ap1);
+    }
 
-    float3 tonemapped_ap1 = filmtonemap::ApplyExtended(graded_ap1, config.film);
     color_working = mul(
         float3x3(
             config.output.working_from_ap1_row_0,
