@@ -161,7 +161,7 @@ renodx::utils::settings::Settings settings = {
     new renodx::utils::settings::Setting{
         .key = "ColorGradeConeResponse",
         .binding = &shader_injection.tone_map_cone_response,
-        .default_value = 50.f,
+        .default_value = 60.f,
         .label = "Cone Response Exponent",
         .section = "Color Grading",
         .tooltip = "PsychoV24: Scales the cone response exponent used for contrast and purity.",
