@@ -36,6 +36,7 @@ struct ShaderInjectData {
   float custom_local_exposure_strength;
   float custom_sharpening_strength;
   float custom_film_grain_strength;
+  float custom_itm_intensity;
 
   // PsychoV24 tone mapper parameters
   float tone_map_cone_response;
@@ -59,14 +60,14 @@ cbuffer cb13 : register(b13, space50) {
 #define RENODX_DIFFUSE_WHITE_NITS            shader_injection.diffuse_white_nits
 #define RENODX_GRAPHICS_WHITE_NITS           shader_injection.graphics_white_nits
 //#define RENODX_GAMMA_CORRECTION              shader_injection.gamma_correction
-#define RENODX_GAMMA_CORRECTION_UI           shader_injection.gamma_correction_ui
+#define RENODX_GAMMA_CORRECTION_UI           1.f  // hardcoded: always emulate 2.2 EOTF for UI
 #define RENODX_TONE_MAP_OVERRIDE_BLACK_CLIP  shader_injection.tone_map_override_black_clip  // 0 - Off, 1 - 0.0001 nits
 #define RENODX_TONE_MAP_HUE_CORRECTION_TYPE  shader_injection.tone_map_hue_correction_type  // 0 - Highlights, Midtones, & Shadows, 1 - Midtones & Shadows
 #define RENODX_TONE_MAP_HUE_CORRECTION       shader_injection.tone_map_hue_correction
 #define RENODX_TONE_MAP_EXPOSURE             shader_injection.tone_map_exposure
 #define RENODX_TONE_MAP_HIGHLIGHTS           shader_injection.tone_map_highlights
 #define RENODX_TONE_MAP_SHADOWS              shader_injection.tone_map_shadows
-#define RENODX_TONE_MAP_CONTRAST             shader_injection.tone_map_contrast
+#define RENODX_TONE_MAP_CONTRAST             (RENODX_TONE_MAP_TYPE == 2.f) ? 0.f : shader_injection.tone_map_contrast
 #define RENODX_TONE_MAP_SATURATION           shader_injection.tone_map_saturation
 #define RENODX_TONE_MAP_HIGHLIGHT_SATURATION shader_injection.tone_map_highlight_saturation
 #define RENODX_TONE_MAP_BLOWOUT              shader_injection.tone_map_blowout
@@ -77,8 +78,6 @@ cbuffer cb13 : register(b13, space50) {
 
 #define RENODX_TONE_MAP_CONE_RESPONSE_EXPONENT  shader_injection.tone_map_cone_response
 #define RENODX_TONE_MAP_GAMUT_COMPRESSION       shader_injection.tone_map_gamut_compression
-#define RENODX_TONE_MAP_GAMUT_COMPRESSION_MODE  shader_injection.tone_map_gamut_compression_mode
-#define RENODX_TONE_MAP_COMPRESSION             shader_injection.tone_map_compression
 #define RENODX_TONE_MAP_GAMUT_HUE_RESTORE       shader_injection.tone_map_gamut_hue_restore
 
 #define CUSTOM_RANDOM                  shader_injection.custom_random
@@ -86,9 +85,9 @@ cbuffer cb13 : register(b13, space50) {
 #define CUSTOM_GRAIN_STRENGTH          shader_injection.custom_grain_strength
 #define CUSTOM_SHARPNESS               shader_injection.custom_sharpness
 #define CUSTOM_CHROMATIC_ABERRATION    shader_injection.custom_chromatic_aberration
-#define CUSTOM_LOCAL_EXPOSURE_STRENGTH shader_injection.custom_local_exposure_strength
-#define CUSTOM_LOCAL_EXPOSURE_STRENGTH  (RENODX_TONE_MAP_TYPE == 2.f) ? 0.f : shader_injection.custom_local_exposure_strength
+#define CUSTOM_LOCAL_EXPOSURE_STRENGTH  shader_injection.custom_local_exposure_strength
 #define CUSTOM_SHARPENING_STRENGTH     shader_injection.custom_sharpening_strength
+#define CUSTOM_ITM_INTENSITY           shader_injection.custom_itm_intensity
 
 // #define FIX_POST_PROCESS                     shader_injection.fix_post_process     // 0 - BT.2020 PQ, 1 - BT.709 piecewise sRGB, 2 - BT.2020 piecewise sRGB
 

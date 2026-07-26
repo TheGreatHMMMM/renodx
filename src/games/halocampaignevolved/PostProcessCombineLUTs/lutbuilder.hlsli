@@ -124,9 +124,9 @@ bool TryApplyCustomLUTBuilder(
           0.18f,                       // current_adaptive_state (fixed)
           0.18f,                       // current_background_state (fixed)
           RENODX_TONE_MAP_GAMUT_COMPRESSION,
-          (int)RENODX_TONE_MAP_GAMUT_COMPRESSION_MODE,
+          1.f,
           1.f,                         // adaptive_normalization (unused)
-          RENODX_TONE_MAP_COMPRESSION,
+          0.f,
           1.f,                         // highlight_saturation (unused)
           RENODX_TONE_MAP_GAMUT_HUE_RESTORE);
       tonemapped_ap1 = renodx::color::ap1::from::BT709(tonemapped_ap1);

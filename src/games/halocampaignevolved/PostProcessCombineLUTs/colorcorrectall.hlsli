@@ -10,6 +10,11 @@ namespace lutbuilder {
 // values and scalar expressions are intentionally retained instead of using
 // Unreal Engine source-derived helper implementations.
 float3 ColorCorrectAll(float3 working_color, ColorCorrectionConfig config) {
+  float maxch_scale = 1.f;
+  float3 colIn = working_color;
+  maxch_scale = renodx::tonemap::neutwo::ComputeMaxChannelScale(working_color);
+  working_color *= maxch_scale;
+
   float _441 = dot(working_color, float3(0.2722287178039551f, 0.6740817427635193f, 0.053689517080783844f));
   float _455 = config.global.offset.w + config.shadows.offset.w;
   float _469 = config.global.gain.w * config.shadows.gain.w;
@@ -39,7 +44,8 @@ float3 ColorCorrectAll(float3 working_color, ColorCorrectionConfig config) {
   float _807 = ((_691 * (((config.global.offset.y + config.highlights.offset.y) + _588) + (((config.global.gain.y * config.highlights.gain.y) * _597) * exp2(log2(exp2(((config.global.contrast.y * config.highlights.contrast.y) * _615) * log2(max(0.f, ((((config.global.saturation.y * config.highlights.saturation.y) * _624) * _516) + _441)) * 5.55555534362793f)) * 0.18000000715255737f) * (1.f / ((config.global.gamma.y * config.highlights.gamma.y) * _606)))))) + (_579 * (((config.global.offset.y + config.shadows.offset.y) + _455) + (((config.global.gain.y * config.shadows.gain.y) * _469) * exp2(log2(exp2(((config.global.contrast.y * config.shadows.contrast.y) * _497) * log2(max(0.f, ((((config.global.saturation.y * config.shadows.saturation.y) * _511) * _516) + _441)) * 5.55555534362793f)) * 0.18000000715255737f) * (1.f / ((config.global.gamma.y * config.shadows.gamma.y) * _483))))))) + ((((config.global.offset.y + config.midtones.offset.y) + _700) + (((config.global.gain.y * config.midtones.gain.y) * _709) * exp2(log2(exp2(((config.global.contrast.y * config.midtones.contrast.y) * _727) * log2(max(0.f, ((((config.global.saturation.y * config.midtones.saturation.y) * _736) * _516) + _441)) * 5.55555534362793f)) * 0.18000000715255737f) * (1.f / ((config.global.gamma.y * config.midtones.gamma.y) * _718))))) * _794);
   float _809 = ((_691 * (((config.global.offset.z + config.highlights.offset.z) + _588) + (((config.global.gain.z * config.highlights.gain.z) * _597) * exp2(log2(exp2(((config.global.contrast.z * config.highlights.contrast.z) * _615) * log2(max(0.f, ((((config.global.saturation.z * config.highlights.saturation.z) * _624) * _517) + _441)) * 5.55555534362793f)) * 0.18000000715255737f) * (1.f / ((config.global.gamma.z * config.highlights.gamma.z) * _606)))))) + (_579 * (((config.global.offset.z + config.shadows.offset.z) + _455) + (((config.global.gain.z * config.shadows.gain.z) * _469) * exp2(log2(exp2(((config.global.contrast.z * config.shadows.contrast.z) * _497) * log2(max(0.f, ((((config.global.saturation.z * config.shadows.saturation.z) * _511) * _517) + _441)) * 5.55555534362793f)) * 0.18000000715255737f) * (1.f / ((config.global.gamma.z * config.shadows.gamma.z) * _483))))))) + ((((config.global.offset.z + config.midtones.offset.z) + _700) + (((config.global.gain.z * config.midtones.gain.z) * _709) * exp2(log2(exp2(((config.global.contrast.z * config.midtones.contrast.z) * _727) * log2(max(0.f, ((((config.global.saturation.z * config.midtones.saturation.z) * _736) * _517) + _441)) * 5.55555534362793f)) * 0.18000000715255737f) * (1.f / ((config.global.gamma.z * config.midtones.gamma.z) * _718))))) * _794);
 
-  working_color = lerp(working_color, float3(_805, _807, _809), RENODX_COLOR_GRADE_STRENGTH);
+  float3 outCol = float3(_805, _807, _809);
+  working_color = lerp(colIn, outCol / maxch_scale, RENODX_COLOR_GRADE_STRENGTH);
   return working_color;
 }
 

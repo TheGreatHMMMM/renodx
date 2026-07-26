@@ -659,7 +659,7 @@ float4 main(
     if (RENODX_GAMMA_CORRECTION != 0.f) {
       color_bt709 = renodx::color::correct::GammaSafe(color_bt709);
     }
-    color_bt709 = HDRBoost(color_bt709, 0.35);
+    color_bt709 = HDRBoost(color_bt709, 0.35 * CUSTOM_ITM_INTENSITY);
     color_bt2020 = renodx::color::bt2020::from::BT709(color_bt709);
     color_pq = renodx::color::pq::EncodeSafe(color_bt2020, RENODX_DIFFUSE_WHITE_NITS);
   } else {
