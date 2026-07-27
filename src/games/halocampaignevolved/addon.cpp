@@ -43,6 +43,17 @@ renodx::utils::settings::Settings settings = {
         .labels = {"Vanilla", "RenoDX (Vanilla+)", "PsychoV24"},
     },
     new renodx::utils::settings::Setting{
+        .key = "ToneMapGammaCorrection",
+        .binding = &shader_injection.gamma_correction,
+        .value_type = renodx::utils::settings::SettingValueType::BOOLEAN,
+        .default_value = 1.f,
+        .label = "SDR EOTF Emulation",
+        .section = "Tone Mapping",
+        .tooltip = "Emulates a 2.2 EOTF",
+        .labels = {"Off", "2.2"},
+        .is_visible = []() { return shader_injection.tone_map_type == 1.f; },
+    },
+    new renodx::utils::settings::Setting{
         .key = "ToneMapOverrideBlackClip",
         .binding = &shader_injection.tone_map_override_black_clip,
         .value_type = renodx::utils::settings::SettingValueType::BOOLEAN,
@@ -50,7 +61,6 @@ renodx::utils::settings::Settings settings = {
         .label = "Override Black Clip",
         .section = "Tone Mapping",
         .tooltip = "Disables black clip in the tonemapper. Prevents crushing or black raise when the black clip parameter is used",
-        .is_enabled = []() { return shader_injection.tone_map_type != 0.f; },
         .is_visible = []() { return shader_injection.tone_map_type == 1.f; },
     },
     new renodx::utils::settings::Setting{
@@ -138,6 +148,16 @@ renodx::utils::settings::Settings settings = {
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
+        .key = "ColorGradeShadowSaturation",
+        .binding = &shader_injection.tone_map_shadow_saturation,
+        .default_value = 50.f,
+        .label = "Shadow Saturation",
+        .section = "Color Grading",
+        .max = 100.f,
+        .is_visible = []() { return shader_injection.tone_map_type == 2.f; },
+        .parse = [](float value) { return value * 0.02f; },
+    },
+    new renodx::utils::settings::Setting{
         .key = "ColorGradeConeResponse",
         .binding = &shader_injection.tone_map_cone_response,
         .default_value = 50.f,
@@ -178,6 +198,7 @@ renodx::utils::settings::Settings settings = {
         .section = "Color Grading",
         .tooltip = "Adds or removes highlight color.",
         .max = 100.f,
+        .is_enabled = []() { return shader_injection.tone_map_type != 0.f; },
         .parse = [](float value) { return value * 0.02f; },
     },
     new renodx::utils::settings::Setting{
@@ -188,6 +209,7 @@ renodx::utils::settings::Settings settings = {
         .section = "Color Grading",
         .tooltip = "Controls highlight desaturation due to overexposure.",
         .max = 100.f,
+        .is_enabled = []() { return shader_injection.tone_map_type != 0.f; },
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
@@ -198,6 +220,7 @@ renodx::utils::settings::Settings settings = {
         .section = "Color Grading",
         .tooltip = "Flare/Glare Compensation",
         .max = 100.f,
+        .is_enabled = []() { return shader_injection.tone_map_type != 0.f; },
         .parse = [](float value) { return value * 0.01f; },
     },
     new renodx::utils::settings::Setting{
@@ -312,6 +335,7 @@ renodx::utils::settings::Settings settings = {
           renodx::utils::settings::UpdateSettings({
               {"ToneMapType", 2.f},
               {"ColorGradeConeResponse", 70.f},
+              {"ColorGradeShadowSaturation", 70.f},
               {"ColorGradeHighlights", 40.f},
               {"ColorGradeSaturation", 40.f},
               {"FxChromaticAberration", 0.f},
@@ -390,8 +414,8 @@ void OnPresetOff() {
       {"ToneMapPeakNits", 0.f},
       {"ToneMapGameNits", 203.f},
       {"ToneMapUINits", 203.f},
-      {"ToneMapGammaCorrection", 0.f},
-      {"ToneMapOverrideBlackClip", 0.f},
+      {"ToneMapGammaCorrection", 1.f},
+      {"ToneMapOverrideBlackClip", 1.f},
       {"ColorGradeExposure", 1.f},
       {"ColorGradeHighlights", 50.f},
       {"ColorGradeShadows", 50.f},
@@ -422,10 +446,14 @@ void OnInitSwapchain(reshade::api::swapchain* swapchain, bool resize) {
   fired_on_init_swapchain = true;
   auto peak = renodx::utils::swapchain::GetPeakNits(swapchain);
   if (peak.has_value()) {
-    settings[2]->default_value = peak.value();
-    settings[2]->can_reset = true;
+    auto* peak_setting = renodx::utils::settings::FindSetting("ToneMapPeakNits");
+    if (peak_setting != nullptr) {
+      peak_setting->default_value = peak.value();
+      peak_setting->can_reset = true;
+    }
   }
 }
+
 
 bool initialized = false;
 

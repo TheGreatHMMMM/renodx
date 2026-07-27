@@ -98,14 +98,22 @@ bool TryApplyCustomLUTBuilder(
   if ((config.output.output_device != outputdevice::LINEAR_EXR) && (config.output.output_device != outputdevice::NO_TONE_CURVE)) {
     float3 tonemapped_ap1;
     if (RENODX_TONE_MAP_TYPE == 1.f) {
+
+      if (RENODX_GAMMA_CORRECTION == 1.f) {
+        graded_ap1 = renodx::color::correct::GammaSafe(graded_ap1);
+      }
+
       // Vanilla+ applies the shared color grade in AP1 before the film curve.
-      graded_ap1 = renodx::color::correct::GammaSafe(graded_ap1);
       graded_ap1 = ApplyUserGradingAP1(graded_ap1);
       tonemapped_ap1 = filmtonemap::ApplyExtended(graded_ap1, config.film);
     }
     if (RENODX_TONE_MAP_TYPE == 2.f) {
-      // PsychoV24 consumes the shared grade sliders through its own parameters,
-      // so the AP1 user grade is intentionally skipped to avoid double-applying.
+      // PsychoV24 consumes exposure/highlights/shadows/contrast/saturation
+      // through its own parameters, so the full AP1 user grade is skipped to
+      // avoid double-applying. The remaining shared sliders (flare, blowout,
+      // highlight saturation) have no PsychoV24 equivalent, so apply them here.
+      graded_ap1 = ApplyPsychoExtraGradingAP1(graded_ap1);
+
       graded_ap1 = renodx::color::bt709::from::AP1(graded_ap1);
       tonemapped_ap1 = renodx::tonemap::psychov::psychotm_test24(
           graded_ap1,
@@ -129,6 +137,7 @@ bool TryApplyCustomLUTBuilder(
           0.f,
           1.f,                         // highlight_saturation (unused)
           RENODX_TONE_MAP_GAMUT_HUE_RESTORE);
+      tonemapped_ap1 = ShadowPurityBT709(tonemapped_ap1, RENODX_TONE_MAP_SHADOW_SATURATION);
       tonemapped_ap1 = renodx::color::ap1::from::BT709(tonemapped_ap1);
     }
 

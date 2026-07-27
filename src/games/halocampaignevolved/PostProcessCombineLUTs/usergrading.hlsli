@@ -159,4 +159,66 @@ float3 ApplyUserGradingAP1(float3 ungraded_ap1) {
   return graded_ap1;
 }
 
+// PsychoV24 consumes exposure/highlights/shadows/contrast/saturation through its
+// own parameters, so only the remaining shared sliders — flare, blowout, and
+// highlight saturation — need to be applied here. These mirror the vanilla
+// grade in ApplyUserGradingAP1 so the sliders behave identically across tone
+// mappers. Exposure is folded into the luminance key (to match where the
+// vanilla path keys these effects) but is intentionally NOT baked into the
+// output scale, since PsychoV24 applies exposure itself.
+float3 ApplyPsychoExtraGradingAP1(float3 ungraded_ap1) {
+  if (RENODX_TONE_MAP_FLARE == 0.f
+      && RENODX_TONE_MAP_BLOWOUT == 0.f
+      && RENODX_TONE_MAP_HIGHLIGHT_SATURATION == 1.f) {
+    return ungraded_ap1;
+  }
+
+  const float MID_GRAY = 0.18f;
+  float yf = max(renodx::color::yf::from::AP1(ungraded_ap1), 0.f);
+  float exposed_yf = yf * RENODX_TONE_MAP_EXPOSURE;
+
+  // Flare: reuse the anchored contrast curve with only the flare term active,
+  // then isolate the flare reshape (exclude exposure) as a luminance ratio.
+  float graded_yf = exposed_yf;
+  float flare_ratio = 1.f;
+  if (RENODX_TONE_MAP_FLARE != 0.f) {
+    graded_yf = ApplyAnchoredPowerContrast(
+        exposed_yf,
+        1.f,  // contrast (handled by PsychoV24)
+        MID_GRAY,
+        MID_GRAY,
+        0.10f * pow(RENODX_TONE_MAP_FLARE, 10.f));
+    flare_ratio = renodx::math::DivideSafe(graded_yf, exposed_yf, 1.f);
+  }
+  float3 graded_ap1 = ungraded_ap1 * flare_ratio;
+
+  // Blowout + highlight saturation: same highlight-purity modulation as the
+  // vanilla path, keyed to the exposed/flared scene luminance.
+  float purity_scale = 1.f;
+  if (RENODX_TONE_MAP_BLOWOUT != 0.f) {
+    purity_scale *= lerp(1.f, 0.f, saturate(pow(graded_yf / (10000.f / 100.f), 1.f - RENODX_TONE_MAP_BLOWOUT)));
+  }
+
+  float purity_highlights = 1.f - RENODX_TONE_MAP_HIGHLIGHT_SATURATION;
+  if (purity_highlights != 0.f) {
+    float percent_max = saturate(graded_yf * 100.f / 10000.f);
+    float blowout_change = pow(1.f - percent_max, 100.f * abs(purity_highlights));
+    if (purity_highlights < 0.f) {
+      blowout_change = 2.f - blowout_change;
+    }
+    purity_scale *= blowout_change;
+  }
+
+  if (purity_scale != 1.f) {
+    float3 color_lms = renodx::color::lms::from::AP1(graded_ap1);
+    color_lms = ScalePurityMBAdaptive(
+        color_lms,
+        purity_scale,
+        renodx::color::lms::from::AP1(MID_GRAY.xxx));
+    graded_ap1 = renodx::color::ap1::from::LMS(color_lms);
+  }
+
+  return max(0.f, graded_ap1);
+}
+
 #endif  // RENODX_UNREAL_LUT_BUILDER_USER_GRADING_HLSLI_
